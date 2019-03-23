@@ -151,12 +151,10 @@ class Beacon extends Homey.App {
             return promise.then(() => {
                 return Homey.app.updateDevice(device).then(() => {
                     Homey.app.log( device.getName() + '[✓]');
-                    console.log(device.getName() + '[✓]');
                     device.setDetect();
                     return device
                 }).catch(error => {
-                    Homey.app.log( device.getName() + '[✖]');
-                    console.log(device.getName() + '[x]');
+                    Homey.app.log( device.getName() + '[x]');
                     device.setUndetect();
                 })
             }).catch(error => {
@@ -181,7 +179,22 @@ class Beacon extends Homey.App {
         try {
             const advertisement = await Homey.ManagerBLE.find(device.getData().uuid, Homey.ManagerSettings.get('timeout') * 1000)
 
-            if(advertisement) {
+            console.log('connect');
+            const peripheral = await advertisement.connect();
+
+            disconnectPeripheral = async () => {
+                try {
+                    console.log('try to disconnect peripheral')
+                    if (peripheral.isConnected) {
+                        console.log('disconnect peripheral')
+                        return await peripheral.disconnect()
+                    }
+                } catch (err) {
+                    throw new Error(err);
+                }
+            };
+
+            if(peripheral) {
                 return device
             }
         }
