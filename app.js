@@ -176,32 +176,30 @@ class Beacon extends Homey.App {
             //console.log('disconnectPeripheral not registered yet')
         }
 
-        try {
-            const advertisement = await Homey.ManagerBLE.find(device.getData().uuid, Homey.ManagerSettings.get('timeout') * 1000)
+        const advertisement = await Homey.ManagerBLE.find(device.getData().uuid, Homey.ManagerSettings.get('timeout') * 1000)
 
-            console.log('connect');
-            const peripheral = await advertisement.connect();
+        console.log('connect');
+        const peripheral = await advertisement.connect();
 
-            disconnectPeripheral = async () => {
-                try {
-                    console.log('try to disconnect peripheral')
-                    if (peripheral.isConnected) {
-                        console.log('disconnect peripheral')
-                        return await peripheral.disconnect()
-                    }
-                } catch (err) {
-                    throw new Error(err);
+        disconnectPeripheral = async () => {
+            try {
+                console.log('try to disconnect peripheral')
+                if (peripheral.isConnected) {
+                    console.log('disconnect peripheral')
+                    return await peripheral.disconnect()
                 }
-            };
-
-            if(peripheral) {
-                return device
+            } catch (err) {
+                throw new Error(err)
             }
         }
-        catch (error) {
+
+        if (peripheral) {
             await disconnectPeripheral()
 
-            throw error
+            return device
+        }
+        else {
+            throw new Error('Coult not connect to peripheral')
         }
     }
 
